@@ -1,0 +1,62 @@
+/**
+//not always working (scroll issue on iOS)
+function timer(seconds) {
+    setInterval(function() {
+        seconds--;
+    }, 1000);
+}
+*/
+let countdown;
+const timerDisplay = document.querySelector('.display__time-left');
+const endTime = document.querySelector('.display__end-time');
+const buttons = document.querySelectorAll('[data-time]');
+
+function timer(seconds) {
+    //clear any exsisting timers
+    clearInterval(countdown);
+    const now = Date.now();
+    const then = now + seconds * 1000;
+    displayTimeLeft(seconds);
+    displayEndTime(then);
+
+    countdown = setInterval(() => {
+        const secondLeft = Math.round((then - Date.now())/1000);
+        //check if it should be stopped
+        if(secondLeft < 0) {
+            return;
+        }
+        //display it
+        displayTimeLeft(secondLeft);
+    }, 1000);
+}
+
+function displayTimeLeft(seconds) {
+    const minutes = Math.floor(seconds/60);
+    const remainderSeconds = seconds % 60;
+    const display = `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+    timerDisplay.textContent = display;
+    document.title = display;
+}
+
+function displayEndTime(timestamp) {
+    const end = new Date(timestamp);
+    const hour = end.getHours();
+    const minutes = end.getMinutes();
+    endTime.textContent = `Be back at ${hour}:${minutes < 10 ? '0' : ''}${minutes}`;
+    //version with am/pm hours
+    // const adjustedHour = hour > 12 ? hour - 12 : hour;
+    // endTime.textContent = `Be back at ${adjustedHour}}"${minutes}`;
+}
+
+function startTimer() {
+    const seconds = parseInt(this.dataset.time);
+    timer(seconds);
+}
+
+buttons.forEach(button => button.addEventListener('click', startTimer));
+document.customForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const min = this.minutes.value;
+    timer(min*60);
+    this.reset();
+});
